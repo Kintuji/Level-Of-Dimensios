@@ -3,6 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 #endregion
 
@@ -53,7 +54,10 @@ public class Player : MonoBehaviour, IDamageable
     private PickupClass _pickupClass;
     private SphereWeapon _sphereWeapon;
 
-    private 
+    private PlayerInput _playerInput;
+    private InputAction _moveAction;
+    private Vector2 _currentMovementInput;
+
 
     public Rigidbody RigidBody { get => _rigidBody; set => _rigidBody = value; }
     public bool HaveFlashLight { get => _haveFlashLight; set => _haveFlashLight = value; }
@@ -72,6 +76,20 @@ public class Player : MonoBehaviour, IDamageable
         _pickupClass = GetComponent<PickupClass>();
         _sphereWeapon = GetComponentInChildren<SphereWeapon>();
         _animator = GetComponent<Animator>();
+        _playerInput = GetComponent<PlayerInput>();
+        _moveAction = _playerInput.actions["Movement"];
+    }
+
+    private void Start()
+    {
+        _moveAction.performed += OnMovementInput;
+        _moveAction.canceled += OnMovementInput;
+    }
+
+    void OnDisable()
+    {
+        _moveAction.performed -= OnMovementInput;
+        _moveAction.canceled -= OnMovementInput;
     }
 
     void Update()
@@ -113,7 +131,7 @@ public class Player : MonoBehaviour, IDamageable
             }
             //Debug.Log(_rigidBody.velocity.magnitude);
             PlayerInput();
-            MoveInDirection(new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")));
+           // MoveInDirection(new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")));
             Sprint();
 
             if (_haveFlashLight && _flashLight != null && _flashLight.IsFlashLightOn)
@@ -121,6 +139,10 @@ public class Player : MonoBehaviour, IDamageable
                 _flashLight.Blind();
             }
         }
+    }
+    private void FixedUpdate()
+    {
+        Move(_currentMovementInput);
     }
 
     #endregion
@@ -151,6 +173,19 @@ public class Player : MonoBehaviour, IDamageable
                 _rigidBody.AddForce(Vector2.up * _jumpForce * 15, ForceMode.Impulse);
             }
         }
+    }
+
+    private void OnMovementInput(InputAction.CallbackContext context)
+    {
+        _currentMovementInput = context.ReadValue<Vector2>();
+    }
+
+    private void Move(Vector2 direction)
+    {
+        Vector3 moveDir = (transform.right * direction.x + transform.forward * direction.y).normalized;
+        Vector3 velocity = moveDir * _currentMovementSpeed;
+        velocity.y = _rigidBody.velocity.y;
+        _rigidBody.velocity = velocity;
     }
 
     private void Shoot()

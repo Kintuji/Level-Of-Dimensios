@@ -6,7 +6,7 @@
             "id": "7ed647d2-a1b0-4b80-9526-efc1ed3a0de0",
             "actions": [
                 {
-                    "name": "New action",
+                    "name": "Movement",
                     "type": "Value",
                     "id": "3bc4acb2-ca11-40c8-9d5a-e5ee3850064f",
                     "expectedControlType": "Vector2",
@@ -17,48 +17,59 @@
             ],
             "bindings": [
                 {
-                    "name": "",
-                    "id": "b2b55261-4f1c-4bc9-836c-c9a5b6440322",
+                    "name": "2D Vector",
+                    "id": "1e8bb20d-7eb0-4216-946e-926689dd131e",
+                    "path": "2DVector",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Movement",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "up",
+                    "id": "38d51cf9-74e5-406f-b9c2-2461a6872204",
                     "path": "<Keyboard>/w",
-                    "interactions": "Press",
+                    "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "New action",
+                    "action": "Movement",
                     "isComposite": false,
-                    "isPartOfComposite": false
+                    "isPartOfComposite": true
                 },
                 {
-                    "name": "",
-                    "id": "e1a82c11-dc9d-4092-9221-61b38741ccae",
+                    "name": "down",
+                    "id": "7926ea24-f662-4fb5-b8ee-bc8c5ea5d312",
                     "path": "<Keyboard>/s",
-                    "interactions": "Press",
+                    "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "New action",
+                    "action": "Movement",
                     "isComposite": false,
-                    "isPartOfComposite": false
+                    "isPartOfComposite": true
                 },
                 {
-                    "name": "",
-                    "id": "23d3f7ae-8089-4134-a2c6-062a89419749",
+                    "name": "left",
+                    "id": "f5ce69fc-4f18-401d-a006-27463c81c797",
                     "path": "<Keyboard>/a",
-                    "interactions": "Press",
+                    "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "New action",
+                    "action": "Movement",
                     "isComposite": false,
-                    "isPartOfComposite": false
+                    "isPartOfComposite": true
                 },
                 {
-                    "name": "",
-                    "id": "29d130d1-9890-458b-ac69-3f27312701ba",
+                    "name": "right",
+                    "id": "25f73aab-8350-417a-89ff-0aeec9492a28",
                     "path": "<Keyboard>/d",
-                    "interactions": "Press",
+                    "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "New action",
+                    "action": "Movement",
                     "isComposite": false,
-                    "isPartOfComposite": false
+                    "isPartOfComposite": true
                 }
             ]
         },
