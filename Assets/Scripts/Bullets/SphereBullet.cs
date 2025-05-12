@@ -10,14 +10,20 @@ public class SphereBullet : MonoBehaviour
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
-        Destroy(gameObject,5);
+      //  Destroy(gameObject,5);
     }
 
-    public void Move(Vector3 direction)
+    private void FixedUpdate()
     {
         Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
-        rigidbody.velocity = direction.normalized * bulletSpeed;
+        rigidbody.velocity = transform.forward * bulletSpeed;
     }
+
+    //public void Move(Vector3 direction)
+    //{
+    //    Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
+    //    rigidbody.velocity = direction.normalized * bulletSpeed;
+    //}
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -26,6 +32,7 @@ public class SphereBullet : MonoBehaviour
         if (enemies != null)
         {
             enemies.TakeDamage(20);
+            gameObject.SetActive(false);
         }
     }
 }

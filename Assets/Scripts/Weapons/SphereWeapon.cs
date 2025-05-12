@@ -8,17 +8,21 @@ public class SphereWeapon : MonoBehaviour
     private bool _sphereSent;
     private MeshRenderer _sphereRenderer;
 
+    private ObjPooling _objPulling;
+
     private void Awake()
     {
         _sphereRenderer = GetComponent<MeshRenderer>();
+        _objPulling = GameObject.Find("ObjPulling").GetComponent<ObjPooling>();
     }
 
     public void Shoot()
     {
         if(_sphereSent == false)
         {
-            SphereBullet sphereBullet = Instantiate(_sphereBulletPreFab, transform.position, Quaternion.identity);
-            sphereBullet.Move(transform.forward);
+            //  SphereBullet sphereBullet = Instantiate(_sphereBulletPreFab, transform.position, Quaternion.identity);
+            //  sphereBullet.Move(transform.forward);
+            _objPulling.PoolBullet(gameObject.transform);
             _sphereRenderer.enabled = false;
             _sphereSent = true;
         }

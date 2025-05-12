@@ -53,6 +53,8 @@ public class Player : MonoBehaviour, IDamageable
     private PickupClass _pickupClass;
     private SphereWeapon _sphereWeapon;
 
+    private 
+
     public Rigidbody RigidBody { get => _rigidBody; set => _rigidBody = value; }
     public bool HaveFlashLight { get => _haveFlashLight; set => _haveFlashLight = value; }
     public float Hp { get => _hp; set => _hp = value; }
@@ -160,7 +162,7 @@ public class Player : MonoBehaviour, IDamageable
     }
     private void Interact()
     {
-        _pickupClass.PickUp();
+     //   _pickupClass.PickUp();
     }
     private void FlashLight()
     {
