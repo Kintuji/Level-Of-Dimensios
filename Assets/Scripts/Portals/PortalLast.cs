@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class PortalLast : MonoBehaviour
 {
     [SerializeField] private Transform _dreamSpawn;
+    [SerializeField] private UnityEvent _onWin;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -14,7 +16,7 @@ public class PortalLast : MonoBehaviour
         {
             GameManager.instance.PlayerTeleportedForDreamSpawn = true;
             player.transform.position = _dreamSpawn.position;
-            GameManager.instance.CheckGameWin();
+            _onWin?.Invoke();
         }
     }
 }

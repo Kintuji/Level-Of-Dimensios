@@ -1,74 +1,85 @@
-#region Namespaces/Directives
-
+#region Namespaces
+using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
-
 #endregion
 
 public class Player : MonoBehaviour, IDamageable
 {
-    #region States
-    private enum State
-    {
-        None,
-        Grounded,
-        Walled,
-        OnAir,
-        RunningOnWall
+    #region EnumsStateMachine
+    private enum State 
+    { 
+        None, 
+        Grounded, 
+        Walled, 
+        OnAir, 
+        RunningOnWall 
     }
+    
     #endregion
 
-    #region Declarations
-
+    #region Movement Settings
     [Header("Movement Settings")]
     [SerializeField] private float _currentMovementSpeed;
-    private float _originalMovementSpeed = 5;
-    private float _sprintMovementSpeed = 8;
     [SerializeField] private float _jumpForce;
     [SerializeField] private float groundCheckDistance;
     [SerializeField] private float wallCheckDistance;
-    [SerializeField] private State _currentState;
+    [SerializeField] private float groundCheckRadius;
 
+    private float _originalMovementSpeed = 5;
+    private float _sprintMovementSpeed = 8;
+    private State _currentState;
+    private bool isGrounded;
+    private bool isOnWall;
+    #endregion
+
+    #region Stats
     [Header("Stats")]
     [SerializeField] private float _hp;
-    private bool _isPlayerAlive;
+    private bool _isPlayerAlive = true;
     private bool _haveFlashLight = true;
     private bool _haveSphereWeapon;
+    private int isBurning;
+    private IEnumerator _currentBurnCoroutine;
+    #endregion
 
+    #region References
     [Header("My References")]
     private Rigidbody _rigidBody;
     private Animator _animator;
-    [SerializeField] private LayerMask groundLayer;
-    [SerializeField] private LayerMask wallLayer;
-    [SerializeField] private float groundCheckRadius;
-    private bool isGrounded;
-    private bool isOnWall;
     private FlashLight _flashLight;
-    private bool _flashLightOn;
-
-    private int isBurning;
-    private IEnumerator _currentBurnCoroutine;
-
     private PickupClass _pickupClass;
     private SphereWeapon _sphereWeapon;
 
+    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private LayerMask wallLayer;
+    #endregion
+
+    #region Input System
     private PlayerInput _playerInput;
     private InputAction _moveAction;
+    private InputAction _jumpAction;
+    private InputAction _lightAction;
+    private InputAction _shootAction;
     private Vector2 _currentMovementInput;
+    #endregion
 
+    #region Events
+    private Action _onDeath;
+    public Action OnDeath { get => _onDeath; set => _onDeath = value; }
+    #endregion
 
-    public Rigidbody RigidBody { get => _rigidBody; set => _rigidBody = value; }
+    #region Properties
+    public Rigidbody RigidBody => _rigidBody;
     public bool HaveFlashLight { get => _haveFlashLight; set => _haveFlashLight = value; }
     public float Hp { get => _hp; set => _hp = value; }
     public bool HaveSphereWeapon { get => _haveSphereWeapon; set => _haveSphereWeapon = value; }
     public bool IsPlayerAlive { get => _isPlayerAlive; set => _isPlayerAlive = value; }
-
     #endregion
 
     #region MonoBehaviour
-
     private void Awake()
     {
         _rigidBody = GetComponent<Rigidbody>();
@@ -77,109 +88,76 @@ public class Player : MonoBehaviour, IDamageable
         _sphereWeapon = GetComponentInChildren<SphereWeapon>();
         _animator = GetComponent<Animator>();
         _playerInput = GetComponent<PlayerInput>();
+
         _moveAction = _playerInput.actions["Movement"];
+        _jumpAction = _playerInput.actions["Jump"];
+        _lightAction = _playerInput.actions["Light"];
+        _shootAction = _playerInput.actions["Shoot"];
     }
 
-    private void Start()
+    private void OnEnable()
     {
         _moveAction.performed += OnMovementInput;
         _moveAction.canceled += OnMovementInput;
+        _jumpAction.performed += OnJumpInput;
+        _lightAction.performed += OnLightInput;
+        _shootAction.performed += OnShootInput;
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         _moveAction.performed -= OnMovementInput;
         _moveAction.canceled -= OnMovementInput;
+        _jumpAction.performed -= OnJumpInput;
+        _lightAction.performed -= OnLightInput;
+        _shootAction.performed -= OnShootInput;
     }
 
-    void Update()
+    private void Update()
     {
-        if (GameManager.instance.PlayerTeleportedForDreamSpawn == false)
+        if (!GameManager.instance.PlayerTeleportedForDreamSpawn)
         {
             GroundCheck();
-            if (isGrounded)
-            {
-                _currentState = State.Grounded;
-            }
-            else if (isOnWall)
-            {
-                if (_rigidBody.velocity.magnitude > 5)
-                {
-                    _currentState = State.RunningOnWall;
-                }
-                else
-                {
-                    _currentState = State.Walled;
-                }
-            }
-            else
-            {
-                _currentState = State.OnAir;
-            }
-
-            if (_currentState == State.RunningOnWall)
-            {
-                _rigidBody.useGravity = false;
-                Vector3 finalVelocity = _rigidBody.velocity;
-                finalVelocity.y = 0;
-                _rigidBody.velocity = finalVelocity;
-
-            }
-            else
-            {
-                _rigidBody.useGravity = true;
-            }
-            //Debug.Log(_rigidBody.velocity.magnitude);
-            PlayerInput();
-           // MoveInDirection(new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")));
+            StateMachineLayersCheck();
             Sprint();
 
             if (_haveFlashLight && _flashLight != null && _flashLight.IsFlashLightOn)
-            {
                 _flashLight.Blind();
-            }
         }
     }
+
     private void FixedUpdate()
     {
         Move(_currentMovementInput);
     }
-
     #endregion
 
-    private void PlayerInput()
-    {
-        if(Input.GetKeyDown(KeyCode.Mouse0))
-        {
-            FlashLight();
-        }
-        if(Input.GetKeyDown(KeyCode.E))
-        {
-            Interact();
-        }
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            Shoot();
-        }
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            if (_currentState == State.Grounded)
-            {
-                Jump();
-            }
-            else if (_currentState == State.Walled)
-            {
-                _rigidBody.velocity = Vector3.zero;
-                _rigidBody.AddForce(Vector2.up * _jumpForce * 15, ForceMode.Impulse);
-            }
-        }
-    }
-
+    #region InputHandlers
     private void OnMovementInput(InputAction.CallbackContext context)
     {
         _currentMovementInput = context.ReadValue<Vector2>();
     }
 
+    private void OnJumpInput(InputAction.CallbackContext context)
+    {
+        if (context.performed && _currentState == State.Grounded)
+            Jump();
+    }
+
+    private void OnLightInput(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+            FlashLight();
+    }
+
+    private void OnShootInput(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+            Shoot();
+    }
+    #endregion
+
+    #region Movement & Actions
     private void Move(Vector2 direction)
     {
         Vector3 moveDir = (transform.right * direction.x + transform.forward * direction.y).normalized;
@@ -188,49 +166,68 @@ public class Player : MonoBehaviour, IDamageable
         _rigidBody.velocity = velocity;
     }
 
-    private void Shoot()
+    private void Jump()
     {
-        if (_haveSphereWeapon == true)
-        {
-        _sphereWeapon.Shoot();
-        }
+        _rigidBody.velocity = Vector3.zero;
+        _rigidBody.AddForce(Vector2.up * _jumpForce, ForceMode.Impulse);
     }
-    private void Interact()
-    {
-     //   _pickupClass.PickUp();
-    }
-    private void FlashLight()
-    {
-        if (_haveFlashLight == true)
-        {
-        _flashLight.TurnOnAndOff();
-        }
-    }
+
     private void Sprint()
     {
         if (Input.GetKeyDown(KeyCode.LeftShift))
-        {
             _currentMovementSpeed = _sprintMovementSpeed;
-        }
         else if (Input.GetKeyUp(KeyCode.LeftShift))
-        {
             _currentMovementSpeed = _originalMovementSpeed;
-        }
     }
+    #endregion
+
+    #region Abilities
+    private void FlashLight()
+    {
+        if (_haveFlashLight)
+            _flashLight.TurnOnAndOff();
+    }
+
+    private void Shoot()
+    {
+        if (_haveSphereWeapon)
+            _sphereWeapon.Shoot();
+    }
+
+    private void Interact()
+    {
+        // _pickupClass.PickUp();
+    }
+    #endregion
+
+    #region Environment Checks
     private void GroundCheck()
     {
-        RaycastHit hit1;
+        isGrounded = Physics.SphereCast(transform.position, 0.9f, Vector2.down, out _, groundCheckDistance, groundLayer);
+    }
 
-        if (Physics.SphereCast(transform.position, 0.9f, Vector2.down, out hit1, groundCheckDistance, groundLayer))
+    private void StateMachineLayersCheck()
+    {
+        if (isGrounded)
+            _currentState = State.Grounded;
+        else if (isOnWall)
+            _currentState = _rigidBody.velocity.magnitude > 5 ? State.RunningOnWall : State.Walled;
+        else
+            _currentState = State.OnAir;
+
+        if (_currentState == State.RunningOnWall)
         {
-            isGrounded = true;
-           // Debug.Log("isGrounded True");
-        } else
+            _rigidBody.useGravity = false;
+            Vector3 finalVelocity = _rigidBody.velocity;
+            finalVelocity.y = 0;
+            _rigidBody.velocity = finalVelocity;
+        }
+        else
         {
-           // Debug.Log("isGrounded False");
-            isGrounded = false;
+            _rigidBody.useGravity = true;
         }
     }
+
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
@@ -239,33 +236,29 @@ public class Player : MonoBehaviour, IDamageable
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position - Vector3.up * groundCheckDistance, groundCheckRadius);
     }
-    private void Jump()
-    {  
-        _rigidBody.velocity = Vector3.zero;
-        _rigidBody.AddForce(Vector2.up * _jumpForce, ForceMode.Impulse);
-    }
+    #endregion
 
-    private void MoveInDirection(Vector2 direction)
-    {
-        Vector3 finalVelocity = (direction.x * transform.right + direction.y * transform.forward).normalized * _currentMovementSpeed;
-
-        finalVelocity.y = _rigidBody.velocity.y;
-        _rigidBody.velocity = finalVelocity;
-    }
+    #region Combat & Damage
     public void TakeDamage(int damage)
     {
-       if (_isPlayerAlive == true)
-       {
-            _hp -= damage;
-            UIManager.instance.UpdateHP(_hp, 100);
-        }
-       if (_hp <= 0)
-       {
+        if (!_isPlayerAlive) return;
+
+        _hp -= damage;
+        UIManager.instance.UpdateHP(_hp, 100);
+
+        if (_hp <= 0)
+        {
             _isPlayerAlive = false;
-            GameManager.instance.CheckPlayerDead();
-       }
-        
+            _onDeath?.Invoke();
+        }
     }
+
+    public void RestoreHP()
+    {
+        _hp = 100;
+        UIManager.instance.UpdateHP(_hp, 100);
+    }
+
     public IEnumerator SlowDown(float movementSpeed, float time)
     {
         _currentMovementSpeed = movementSpeed;
@@ -275,20 +268,18 @@ public class Player : MonoBehaviour, IDamageable
 
     public void Burning()
     {
-        if (_isPlayerAlive == true)
-        {
-            if (_currentBurnCoroutine != null)
-            {
-                StopCoroutine(_currentBurnCoroutine);
-            }
-            _currentBurnCoroutine = BurnDamage();
-            StartCoroutine(_currentBurnCoroutine);
-        }
+        if (!_isPlayerAlive) return;
+
+        if (_currentBurnCoroutine != null)
+            StopCoroutine(_currentBurnCoroutine);
+
+        _currentBurnCoroutine = BurnDamage();
+        StartCoroutine(_currentBurnCoroutine);
     }
-    IEnumerator BurnDamage()
+
+    private IEnumerator BurnDamage()
     {
         isBurning = 0;
-
         while (isBurning < 3)
         {
             yield return new WaitForSeconds(1);
@@ -296,24 +287,20 @@ public class Player : MonoBehaviour, IDamageable
             isBurning++;
         }
     }
+    #endregion
 
+    #region Collisions
     private void OnTriggerEnter(Collider other)
     {
         ICollectable collectable = other.GetComponent<ICollectable>();
-
-        if (collectable != null)
-        {
-            collectable.Collect();
-        }
+        collectable?.Collect();
     }
-    public void RestoreHP()
-    {
-        _hp = 100;
-        UIManager.instance.UpdateHP(_hp, 100);
-    }
+    #endregion
 
+    #region Animation
     public void PlayerAnimation()
     {
         _animator.SetBool("WakeUp", true);
     }
+    #endregion
 }

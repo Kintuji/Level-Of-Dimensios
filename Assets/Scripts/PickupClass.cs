@@ -30,7 +30,7 @@ public class PickupClass : MonoBehaviour
                 currentObjectCollider.enabled = true;
                 //currentObjectRB.transform.SetParent(hand, false);
             }
-
+            
             currentObject = hit.transform;
             currentObjectRB = hit.rigidbody;
             currentObjectCollider = hit.collider;

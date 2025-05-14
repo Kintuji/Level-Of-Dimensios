@@ -32,7 +32,8 @@ public class ObjPooling : MonoBehaviour
             }
            
         }
-        SphereBullet sphereBullet = Instantiate(_sphereBulletPreFab, weaponPos);
+        SphereBullet sphereBullet = Instantiate(_sphereBulletPreFab, weaponPos.position, weaponPos.rotation);
+
         sphereBullet.gameObject.SetActive(true);
         _sphereBulletPool.Add(sphereBullet);
         return sphereBullet;

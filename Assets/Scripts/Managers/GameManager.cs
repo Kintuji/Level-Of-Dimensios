@@ -1,5 +1,6 @@
 #region Namespaces/Directives
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,18 +11,20 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-	[SerializeField] private bool _hideCursor;
+    #region Variables
+    [SerializeField] private bool _hideCursor;
     private Player _player;
     private FlashLight _flashLight;
     private SphereWeapon _sphereWeapon;
     private int _keys;
     public static GameManager instance;
     [SerializeField] private List<Transform> _spawns;
+    [SerializeField] private Key _keyReference;
     private Transform _currentPlayerSpawn;
     private int _lives;
     [SerializeField] private GameObject _respawnEffect;
 
-    [SerializeField] private GameObject _portalOne;
+    [SerializeField] private PortalOne _portalOne;
     [SerializeField] private GameObject _portalLast;
 
     private bool _levelOneComplete;
@@ -31,10 +34,15 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject navMeshLink;
     private bool _dreamAnimationComplete;
 
+    private Action _keyAdded;
+    #endregion
+    #region Propreties
     public int Keys { get => _keys; set => _keys = value; }
     public bool PlayerTeleportForLevelTwo { get => _playerTeleportedForLevelTwo; set => _playerTeleportedForLevelTwo = value; }
     public bool PlayerTeleportedForDreamSpawn { get => _playerTeleportedForDreamSpawn; set => _playerTeleportedForDreamSpawn = value; }
-
+    public Action KeyAdded { get => _keyAdded; set => _keyAdded = value; }
+    #endregion
+    #region MonoBehaviour
     private void Awake()
     {
         if (instance != null)
@@ -52,7 +60,12 @@ public class GameManager : MonoBehaviour
         _sphereWeapon.gameObject.SetActive(false);
         _portalLast.gameObject.SetActive(false);
     }
-
+    private void OnEnable()
+    {
+        _player.OnDeath += CheckPlayerDead;
+        _portalOne.LevelOneDone += CheckLevelOneWin;
+        _keyReference.CheckAllKeys += CheckIfHaveAllKeys;
+    }
     void Start()
 	{
 		if (_hideCursor)
@@ -60,32 +73,12 @@ public class GameManager : MonoBehaviour
 			Cursor.visible = false;
 			Cursor.lockState = CursorLockMode.Locked;
 		}
-
         _currentPlayerSpawn = _spawns[0];
         _respawnEffect.SetActive(false);
         _player.IsPlayerAlive = true;
         _lives = 3;
     }
-
-    private void Update()
-    {
-        
-    }
-
-    public void CheckPlayerDead()
-	{
-            _player.RestoreHP();
-            _lives--;
-            StartCoroutine(Respawn());
-            UIManager.instance.UpdateLives(_lives);
-        
-        if(_lives <= 0)
-        {
-            Destroy(_player);
-            StartCoroutine(LostSystem());
-        }
-    }
-
+    #endregion
     public void Addkeys()
     {
         _keys++;
@@ -100,6 +93,20 @@ public class GameManager : MonoBehaviour
     public void ActiveNavMeshLink()
     {
         navMeshLink.SetActive(true);
+    }
+    #region CheckFunction
+    public void CheckPlayerDead()
+	{
+            _player.RestoreHP();
+            _lives--;
+            StartCoroutine(Respawn());
+            UIManager.instance.UpdateLives(_lives);
+        
+        if(_lives <= 0)
+        {
+            Destroy(_player);
+            StartCoroutine(LostSystem());
+        }
     }
     public void CheckLevelOneWin()
     {
@@ -128,6 +135,9 @@ public class GameManager : MonoBehaviour
             _portalLast.gameObject.SetActive(true);
         }
     }
+    #endregion
+
+    #region Coroutins
     private IEnumerator LostSystem()
     {
         UIManager.instance.ShowLostScreen();
@@ -167,6 +177,5 @@ public class GameManager : MonoBehaviour
         _respawnEffect.SetActive(false);
         _player.IsPlayerAlive = true;
     }
+    #endregion
 }
-
-//escrever que era um sonho

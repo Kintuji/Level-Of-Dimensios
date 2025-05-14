@@ -16956,7 +16956,7 @@ MonoBehaviour:
   _jumpForce: 9
   groundCheckDistance: 0.5
   wallCheckDistance: 0
-  _currentState: 1
+  groundCheckRadius: 0.7
   _hp: 100
   groundLayer:
     serializedVersion: 2
@@ -16964,7 +16964,6 @@ MonoBehaviour:
   wallLayer:
     serializedVersion: 2
     m_Bits: 0
-  groundCheckRadius: 0.7
 --- !u!54 &921964639
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -17143,7 +17142,7 @@ MonoBehaviour:
   m_ActionEvents: []
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
-  m_DefaultActionMap: Movement
+  m_DefaultActionMap: PlayerInput
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
 --- !u!1001 &935449534
@@ -20187,6 +20186,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dreamSpawn: {fileID: 1980862914}
+  _onWin:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1918021707}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        m_MethodName: CheckGameWin
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!65 &1554458630
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -22868,13 +22882,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2123344995}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.12280342, y: 0.017320313, z: 0.002143547, w: 0.99227756}
-  m_LocalPosition: {x: -0.61, y: -0.31999952, z: 0.8499985}
+  m_LocalRotation: {x: -0.027658654, y: 0.025075074, z: 0.00022023919, w: 0.99930286}
+  m_LocalPosition: {x: -0.6100006, y: -0.31999952, z: 0.8499985}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 963194228}
-  m_LocalEulerAnglesHint: {x: -14.11, y: 2, z: 0}
+  m_LocalEulerAnglesHint: {x: -3.169, y: 2.876, z: -0.054}
 --- !u!135 &2123344997
 SphereCollider:
   m_ObjectHideFlags: 0
