@@ -11,7 +11,7 @@ public class Key : MonoBehaviour, ICollectable
     public void Collect()
     {
         GameManager.instance.Addkeys();
-        _CheckAllKeys?.Invoke();
+       // _CheckAllKeys?.Invoke();
         Destroy(gameObject);
     }
     

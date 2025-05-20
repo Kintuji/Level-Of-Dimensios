@@ -19,7 +19,7 @@ public class PortalOne : MonoBehaviour
             player.transform.position = _secondLevelSpawn.position;
             GameManager.instance.PlayerTeleportForLevelTwo = true;
             _levelOneDone?.Invoke();
-            GameManager.instance.CheckLevelOneWin();
+           // GameManager.instance.CheckLevelOneWin();
         }
     }
 }

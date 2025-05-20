@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,7 +22,9 @@ public class ClaireBrain : MonoBehaviour
     private Animator _animator;
 
     [SerializeField] private GameObject _key;
+    private Action _keyRemoved;
 
+    public Action KeyRemoved { get => _keyRemoved; set => _keyRemoved = value; }
     private void Awake()
     {
         _state = State.Idle;
@@ -48,7 +51,7 @@ public class ClaireBrain : MonoBehaviour
         {
             _coneAngle = 360;
             _maxDistance = 100;
-            GameManager.instance.ActiveNavMeshLink();
+          //  GameManager.instance.ActiveNavMeshLink();
         }
     }
 

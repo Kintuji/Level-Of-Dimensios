@@ -25,6 +25,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject _respawnEffect;
 
     [SerializeField] private PortalOne _portalOne;
+    [SerializeField] private GameObject _gameObjectPortalOne;
     [SerializeField] private GameObject _portalLast;
 
     private bool _levelOneComplete;
@@ -32,7 +33,11 @@ public class GameManager : MonoBehaviour
     private bool _playerTeleportedForDreamSpawn = false;
 
     [SerializeField] private GameObject navMeshLink;
-    private bool _dreamAnimationComplete;
+    [SerializeField] private ClaireBrain _claireBrain;
+
+    //[SerializeField] List<BobEnemy> _bobEnemyList;
+
+    [SerializeField] GameObject _Level2;
 
     private Action _keyAdded;
     #endregion
@@ -65,6 +70,7 @@ public class GameManager : MonoBehaviour
         _player.OnDeath += CheckPlayerDead;
         _portalOne.LevelOneDone += CheckLevelOneWin;
         _keyReference.CheckAllKeys += CheckIfHaveAllKeys;
+        _claireBrain.KeyRemoved += ActiveNavMeshLink;
     }
     void Start()
 	{
@@ -85,8 +91,9 @@ public class GameManager : MonoBehaviour
         UIManager.instance.UpdateKeys(_keys);
         if (_keys == 5)
         {
-            _portalOne.gameObject.SetActive(true);
+            _gameObjectPortalOne.SetActive(true);
             _levelOneComplete = true;
+            _Level2.SetActive(true);
         }
     }
 
@@ -116,6 +123,8 @@ public class GameManager : MonoBehaviour
             _sphereWeapon.gameObject.SetActive(true);
             _player.HaveSphereWeapon = true;
             _currentPlayerSpawn = _spawns[1];
+
+            //turn on bob
         }
     }
     public void CheckGameWin()

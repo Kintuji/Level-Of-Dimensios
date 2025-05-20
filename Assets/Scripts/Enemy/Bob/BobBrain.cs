@@ -34,9 +34,9 @@ public class BobBrain : MonoBehaviour
     }
 
     private void Update()
-    {
-        CheckState();
-        ExecuteStateBehavior();
+    { 
+            CheckState();
+            ExecuteStateBehavior();   
     }
 
     private void ExecuteStateBehavior()
