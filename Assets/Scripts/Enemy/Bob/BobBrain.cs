@@ -21,9 +21,14 @@ public class BobBrain : MonoBehaviour
 
     [SerializeField] private Transform _bulletPosition;
 
+    private ObjPooling _objPulling;
+    private BobWeaponPos _weaponPos;
+
     private void Awake()
     {
         _animator = GetComponent<Animator>();
+        _objPulling = GameObject.Find("ObjPulling").GetComponent<ObjPooling>();
+        _weaponPos = GetComponentInChildren<BobWeaponPos>();
     }
 
     private enum State
@@ -55,7 +60,9 @@ public class BobBrain : MonoBehaviour
 
             if (haveShooted == true)
             {
+               // _objPulling.PoolEnemyBullet(_weaponPos.transform);
                 InvokeRepeating("Shoot", 2, 2);
+
                 haveShooted = false;
             }
         }

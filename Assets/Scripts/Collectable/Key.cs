@@ -5,13 +5,12 @@ using UnityEngine;
 
 public class Key : MonoBehaviour, ICollectable
 {
-    private Action _CheckAllKeys;
-    public Action CheckAllKeys { get => _CheckAllKeys; set => _CheckAllKeys = value; }
+    public static Action _onKeyCollected;
 
     public void Collect()
     {
-        GameManager.instance.Addkeys();
-       // _CheckAllKeys?.Invoke();
+        //GameManager.instance.Addkeys();
+        _onKeyCollected?.Invoke();
         Destroy(gameObject);
     }
     

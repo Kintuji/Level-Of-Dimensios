@@ -48,17 +48,19 @@ public class ObjPooling : MonoBehaviour
         _sphereBulletPool.Add(sphereBullet);
         return sphereBullet;
     }
-    public EnemyBullet PoolEnemyBullet()
+    public EnemyBullet PoolEnemyBullet(Transform weaponPos)
     {
         for (var i = 0; i < _enemyBulletPool.Count; i++)
         {
             if (!_enemyBulletPool[i].gameObject.activeInHierarchy)
             {
                 _enemyBulletPool[i].gameObject.SetActive(true);
+                _enemyBulletPool[i].gameObject.transform.position = weaponPos.transform.position;
+                _enemyBulletPool[i].gameObject.transform.rotation = weaponPos.transform.rotation;
                 return _enemyBulletPool[i];
             }
         }
-        EnemyBullet enemyBullet = Instantiate(_enemyBulletPreFab);
+        EnemyBullet enemyBullet = Instantiate(_enemyBulletPreFab, weaponPos.position, weaponPos.rotation);
         enemyBullet.gameObject.SetActive(true);
         _enemyBulletPool.Add(enemyBullet);
         return enemyBullet;

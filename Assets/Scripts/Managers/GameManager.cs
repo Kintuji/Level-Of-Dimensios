@@ -19,7 +19,6 @@ public class GameManager : MonoBehaviour
     private int _keys;
     public static GameManager instance;
     [SerializeField] private List<Transform> _spawns;
-    [SerializeField] private Key _keyReference;
     private Transform _currentPlayerSpawn;
     private int _lives;
     [SerializeField] private GameObject _respawnEffect;
@@ -37,6 +36,7 @@ public class GameManager : MonoBehaviour
 
     //[SerializeField] List<BobEnemy> _bobEnemyList;
 
+    [SerializeField] private GameObject _Level1;
     [SerializeField] GameObject _Level2;
 
     private Action _keyAdded;
@@ -69,7 +69,7 @@ public class GameManager : MonoBehaviour
     {
         _player.OnDeath += CheckPlayerDead;
         _portalOne.LevelOneDone += CheckLevelOneWin;
-        _keyReference.CheckAllKeys += CheckIfHaveAllKeys;
+        Key._onKeyCollected += OncollectedKey;
         _claireBrain.KeyRemoved += ActiveNavMeshLink;
     }
     void Start()
@@ -83,6 +83,20 @@ public class GameManager : MonoBehaviour
         _respawnEffect.SetActive(false);
         _player.IsPlayerAlive = true;
         _lives = 3;
+    }
+
+    private void OnDisable()
+    {
+        _player.OnDeath -= CheckPlayerDead;
+        _portalOne.LevelOneDone -= CheckLevelOneWin;
+         Key._onKeyCollected += OncollectedKey;
+        _claireBrain.KeyRemoved -= ActiveNavMeshLink;
+    }
+
+    private void OncollectedKey()
+    {
+        Addkeys();
+        CheckIfHaveAllKeys();
     }
     #endregion
     public void Addkeys()
@@ -123,6 +137,7 @@ public class GameManager : MonoBehaviour
             _sphereWeapon.gameObject.SetActive(true);
             _player.HaveSphereWeapon = true;
             _currentPlayerSpawn = _spawns[1];
+            _Level1.SetActive(false);
 
             //turn on bob
         }
